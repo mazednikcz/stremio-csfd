@@ -2,17 +2,17 @@ const { addonBuilder, serveHTTP } = require('stremio-addon-sdk');
 const { csfd } = require('node-csfd-api');
 const NodeCache = require('node-cache');
 
-// Cache udrží data 24 hodin, aby se ČSFD neptal pořád dokola
 const myCache = new NodeCache({ stdTTL: 86400 });
 
 const manifest = {
-    id: 'org.moje.csfd.ochrana',
-    version: '1.2.0',
+    id: 'org.moje.csfd.oprava',
+    version: '1.2.2',
     name: 'ČSFD Hodnocení',
-    description: 'Barevné hodnocení z ČSFD s ochranou proti blokaci.',
+    description: 'Barevné hodnocení z ČSFD.',
     resources: ['stream'],
     types: ['movie', 'series'],
-    idPrefixes: ['tt']
+    idPrefixes: ['tt'],
+    catalogs: []
 };
 
 const builder = new addonBuilder(manifest);
@@ -26,31 +26,29 @@ function getRatingEmoji(rating) {
 }
 
 builder.defineStreamHandler(async (args) => {
-    const imdbId = args.id;
+    // Pro seriály Stremio posílá "tt12345:1:1", my potřebujeme jen "tt12345"
+    const imdbId = args.id.split(':')[0];
     
-    // 1. Zkusíme se podívat do paměti (cache)
     const cachedData = myCache.get(imdbId);
     if (cachedData) return { streams: [cachedData] };
 
     try {
-        // 2. Pokud není v paměti, zeptáme se ČSFD
         const search = await csfd.search(imdbId);
-        const movie = search.movies;
-
-        if (movie) {
+        // Kontrola, zda vyhledávání něco našlo
+        if (search && search.movies && search.movies.length > 0) {
+            const movie = search.movies[0];
             const emoji = getRatingEmoji(movie.rating);
             const stream = {
                 name: `ČSFD ${emoji}`,
-                title: `${movie.rating || '??'}% - Klikni pro detail`,
+                title: `${movie.rating || '??'}% - Detail na webu`,
                 externalUrl: movie.url
             };
             
-            // Uložíme do paměti pro příště
             myCache.set(imdbId, stream);
             return { streams: [stream] };
         }
     } catch (e) {
-        console.error('ČSFD Error:', e);
+        console.error('CSFD API Error:', e.message);
     }
     return { streams: [] };
 });
