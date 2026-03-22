@@ -1,6 +1,7 @@
 {
-  "name": "stremio-csfd-addon",
-  "version": "1.2.0",
+  "name": "stremio-csfd",
+  "version": "1.2.2",
+  "description": "CSFD ratings for Stremio",
   "main": "index.js",
   "dependencies": {
     "stremio-addon-sdk": "^1.6.10",
