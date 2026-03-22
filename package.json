@@ -1,0 +1,13 @@
+{
+  "name": "stremio-csfd-addon",
+  "version": "1.2.0",
+  "main": "index.js",
+  "dependencies": {
+    "stremio-addon-sdk": "^1.6.10",
+    "node-csfd-api": "^1.2.1",
+    "node-cache": "^5.1.2"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
