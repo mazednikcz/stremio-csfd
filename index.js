@@ -5,8 +5,8 @@ const NodeCache = require('node-cache');
 const myCache = new NodeCache({ stdTTL: 86400 });
 
 const manifest = {
-    id: 'org.moje.csfd.oprava',
-    version: '1.2.2',
+    id: 'org.moje.csfd.final',
+    version: '1.2.5',
     name: 'ČSFD Hodnocení',
     description: 'Barevné hodnocení z ČSFD.',
     resources: ['stream'],
@@ -34,9 +34,8 @@ builder.defineStreamHandler(async (args) => {
 
     try {
         const search = await csfd.search(imdbId);
-        // Kontrola, zda vyhledávání něco našlo
-        if (search && search.movies && search.movies.length > 0) {
-            const movie = search.movies[0];
+        if (search && search.movies) {
+            const movie = search.movies;
             const emoji = getRatingEmoji(movie.rating);
             const stream = {
                 name: `ČSFD ${emoji}`,
@@ -53,5 +52,8 @@ builder.defineStreamHandler(async (args) => {
     return { streams: [] };
 });
 
+// TATO ŘÁDKA CHYBĚLA A ZPŮSOBOVALA CHYBU V LOGU:
+const addonInterface = builder.getInterface();
+
 const port = process.env.PORT || 7000;
-serveHTTP(builder, { port });
+serveHTTP(addonInterface, { port });
